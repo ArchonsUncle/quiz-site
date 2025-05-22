@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archons Community History Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .username-screen {
+            display: block;
+        }
+
+        .quiz-screen, .results-screen {
+            display: none;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .username-input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            margin: 20px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .question-container {
+            margin: 30px 0;
+        }
+
+        .question {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .hard-question {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .double-points {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .option {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .option.correct {
+            background: #4CAF50;
+            border-color: #45a049;
+        }
+
+        .option.incorrect {
+            background: #f44336;
+            border-color: #da190b;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease;
+        }
+
+        .final-score {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #FFD700;
+        }
+
+        .celebration {
+            animation: celebration 2s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Username Screen -->
+        <div class="username-screen">
+            <h1>🏛️ Archons Community History Quiz</h1>
+            <p style="font-size: 1.2em; margin-bottom: 30px;">Test your knowledge of Archons community history!</p>
+            <input type="text" class="username-input" id="usernameInput" placeholder="Enter your username" maxlength="20">
+            <br>
+            <button class="btn btn-primary" id="startButton">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="quiz-screen">
+            <div class="stats">
+                <div>Player: <span id="playerName"></span></div>
+                <div>Score: <span id="score">0</span></div>
+                <div>Question: <span id="questionNum">1</span>/35</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+            </div>
+
+            <button class="btn btn-primary" id="nextBtn" style="display: none;">Next Question</button>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen">
+            <h1 class="celebration">🎉 Quiz Complete! 🎉</h1>
+            <div class="final-score" id="finalScore"></div>
+            <div id="resultMessage"></div>
+            <button class="btn btn-primary" id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        let score = 0;
+        let username = '';
+        let selectedAnswer = false;
+
+        const questions = [
+            {
+                question: "When was the Archons community first established?",
+                options: ["Late 2021", "Early 2022", "Mid 2022", "Early 2023"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who were the founders that merged HYDRA with another group to create Archons?",
+                options: ["Uncle and Robiska", "Founder and Plasmabean", "Vertex82 and Casti123", "Applecow and Ashey173"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What platforms did Archons originally start on?",
+                options: ["Discord and Minecraft", "Discord and Roblox", "Reddit and Roblox", "Discord and Steam"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "How many members did Archons have when they reached their first major milestone?",
+                options: ["50 members", "75 members", "100 members", "150 members"],
+                correct: 2,
+                points: 1,
+                isHard: true
+            },
+            {
+                question: "How many members did Archons have in its first month?",
+                options: ["10", "20", "30", "40"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What became Archons' mission statement after initially having no set goal?",
+                options: ["Promoting gaming skills", "Ending toxicity across games", "Building the biggest community", "Creating content creators"],
+                correct: 1,
+                points: 2,
+                isDouble: true
+            },
+            {
+                question: "Who was the first officer in Archons (before there were moderators)?",
+                options: ["Uncle", "Robiska", "Vertex82", "Founder"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What was the first major event hosted by Archons?",
+                options: ["A tournament", "A battle", "A community meeting", "A building competition"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "When did Archons first reach 1,000 members?",
+                options: ["Mid 2022", "Late 2022/Early 2023", "Mid 2023", "Late 2023"],
+                correct: 1,
+                points: 1,
+                isHard: true
+            },
+            {
+                question: "What was the first major controversy Archons faced?",
+                options: ["Leadership disputes", "Frontier Militia drama regarding false allegations of exploiters", "Server raids", "Member exodus"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who created the second logo for Archons after the first was stolen from Google?",
+                options: ["Uncle", "Applecow", "Vertex82", "Robiska"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "When did Archons first expand to City 17?",
+                options: ["Early 2022", "Mid 2022", "Late 2022", "Early 2023"],
+                correct: 2,
+                points: 1
+            },
+            {
+                question: "What was Archons' first major collaboration that didn't last long?",
+                options: ["City 17 partnership", "City 29 collaboration in 2025", "Frontier Militia alliance", "HYDRA reunion"],
+                correct: 1,
+                points: 2,
+                isDouble: true
+            },
+            {
+                question: "Who was known as the most active early member besides staff?",
+                options: ["Vertex82", "Uncle", "Casti123", "Ashey173"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who conducted the full server and rule overhaul in November 2022?",
+                options: ["Founder", "Uncle", "Robiska", "Plasmabean"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "When did Archons reach its peak membership numbers?",
+                options: ["December 2024", "January 2025", "February 2025", "March 2025"],
+                correct: 2,
+                points: 1
+            },
+            {
+                question: "Which game was NOT among the most popular channels in early Archons?",
+                options: ["The Wild West", "Blox Fruits", "Arsenal", "Grand Piece Online"],
+                correct: 2,
+                points: 1
+            },
+            {
+                question: "Who were known for creating the most memorable community memes?",
+                options: ["Uncle and Robiska", "Vertex82 and Casti123", "Founder and Plasmabean", "Applecow and Ashey173"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What system was briefly implemented for attending events before being removed?",
+                options: ["Medal system", "Rank system", "Points system", "Badge system"],
+                correct: 2,
+                points: 2,
+                isDouble: true
+            },
+            {
+                question: "Who organized the first community game night in 2022?",
+                options: ["Uncle", "Robiska", "Founder", "Vertex82"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who conducted the full brand rebrand with new logo and ideas in early 2023?",
+                options: ["Founder", "Uncle", "Applecow", "Plasmabean"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Around what year did Archons expand internationally to North America and Asia?",
+                options: ["2022", "2023", "2024", "2025"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who became a content creator with 1.8 thousand subscribers?",
+                options: ["Vertex82", "Uncle", "Robiska", "Casti123"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What was the original community slogan?",
+                options: ["Strength in Unity", "Veni, Vidi, Vici", "Archons Forever", "Victory Through Honor"],
+                correct: 1,
+                points: 3,
+                isHard: true
+            },
+            {
+                question: "Who created guides for quickswitching and shiftshooting?",
+                options: ["Uncle", "Robiska", "Ashey173", "Vertex82"],
+                correct: 2,
+                points: 1
+            },
+            {
+                question: "What significant event happened in 2023 when Uncle briefly left Archons?",
+                options: ["Server shutdown", "Major split/exodus of members", "Leadership crisis", "Community vote"],
+                correct: 1,
+                points: 2,
+                isHard: true
+            },
+            {
+                question: "When did Archons begin normalizing voice chats for wars?",
+                options: ["Early 2022", "Mid 2022", "Late 2022", "Early 2023"],
+                correct: 2,
+                points: 1
+            },
+            {
+                question: "What timezone was Archons originally based in?",
+                options: ["GMT+8", "GMT+1", "EST", "PST"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "Who was known as the community's unofficial historian?",
+                options: ["Robiska", "Uncle", "Founder", "Ashey173"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "When were medals first introduced to Archons?",
+                options: ["Early 2022", "Mid 2022", "Late 2022", "Early 2023"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What was the memorable inside joke about someone crashing their horse?",
+                options: ["Uncle is clumsy asf", "Vertex crashes everything", "Miko is retarded", "Robiska can't ride for shit"],
+                correct: 2,
+                points: 3
+            },
+            {
+                question: "Who won the first election in 2024 when Uncle stepped down?",
+                options: ["Vertex82 and Casti123", "Lucky and Filipin", "Robiska and Ashey173", "Founder and Plasmabean"],
+                correct: 1,
+                points: 2,
+                isDouble: true
+            },
+            {
+                question: "When did Founder let Uncle take over permanently?",
+                options: ["2021", "2022", "2023", "2024"],
+                correct: 1,
+                points: 1
+            },
+            {
+                question: "What years are considered the 'golden age' of Archons?",
+                options: ["2021/2022", "2022/2024", "2023/2024", "2024/2025"],
+                correct: 1,
+                points: 3,
+                isHard: true
+            },
+            {
+                question: "Which game was mentioned alongside The Wild West, Blox Fruits, and Grand Piece Online as popular?",
+                options: ["Arsenal", "Northwind", "Phantom Forces", "Jailbreak"],
+                correct: 1,
+                points: 2,
+                isDouble: true
+            }
+        ];
+
+        function startQuiz() {
+            username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                alert('Please enter a username!');
+                return;
+            }
+            
+            document.querySelector('.username-screen').style.display = 'none';
+            document.querySelector('.quiz-screen').style.display = 'block';
+            document.getElementById('playerName').textContent = username;
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question').innerHTML = 
+                q.question + 
+                (q.isDouble ? '<span class="double-points">2X POINTS!</span>' : '') +
+                (q.isHard ? '<div class="hard-question">⚡ HARD QUESTION ⚡</div>' : '');
+            
+            const optionsEl = document.getElementById('options');
+            optionsEl.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index);
+                optionsEl.appendChild(btn);
+            });
+            
+            document.getElementById('questionNum').textContent = currentQuestion + 1;
+            document.getElementById('progress').style.width = ((currentQuestion + 1) / questions.length * 100) + '%';
+            selectedAnswer = false;
+        }
+
+        function selectAnswer(selected) {
+            if (selectedAnswer) return;
+            
+            selectedAnswer = true;
+            const options = document.querySelectorAll('.option');
+            const q = questions[currentQuestion];
+            
+            options.forEach((option, index) => {
+                if (index === q.correct) {
+                    option.classList.add('correct');
+                } else if (index === selected && selected !== q.correct) {
+                    option.classList.add('incorrect');
+                }
+                option.style.pointerEvents = 'none';
+            });
+            
+            if (selected === q.correct) {
+                score += q.points;
+                document.getElementById('score').textContent = score;
+            }
+            
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            if (currentQuestion >= questions.length) {
+                showResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        async function showResults() {
+            document.querySelector('.quiz-screen').style.display = 'none';
+            document.querySelector('.results-screen').style.display = 'block';
+            
+            const maxScore = questions.reduce((sum, q) => sum + q.points, 0);
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            document.getElementById('finalScore').textContent = `${score}/${maxScore} points (${percentage}%)`;
+            
+            let message = '';
+            let webhookMessage = '';
+            
+            if (percentage >= 90) {
+                message = '🏆 ARCHONS LEGEND! You know the community history like the back of your hand!';
+                webhookMessage = `🏆 **${username}** completed the Archons Quiz with **${score}/${maxScore}** points (**${percentage}%**) - ARCHONS LEGEND!`;
+            } else if (percentage >= 70) {
+                message = '🥈 Archons Veteran! Great knowledge of the community!';
+                webhookMessage = `🥈 **${username}** completed the Archons Quiz with **${score}/${maxScore}** points (**${percentage}%**) - Archons Veteran!`;
+            } else if (percentage >= 50) {
+                message = '🥉 Archons Member! You know some history, keep learning!';
+                webhookMessage = `🥉 **${username}** completed the Archons Quiz with **${score}/${maxScore}** points (**${percentage}%**) - Archons Member!`;
+            } else {
+                message = '📚 Archons Newcomer! Time to brush up on community history!';
+                webhookMessage = `📚 **${username}** completed the Archons Quiz with **${score}/${maxScore}** points (**${percentage}%**) - Archons Newcomer!`;
+            }
+            
+            // Send webhook for ALL attempts
+            await sendWebhook(webhookMessage);
+            
+            document.getElementById('resultMessage').innerHTML = `<p style="font-size: 1.3em; margin: 20px 0;">${message}</p>`;
+        }
+
+        async function sendWebhook(message) {
+            const webhookUrl = 'https://discord.com/api/webhooks/1375194770904977450/6y-0tPZppf8VaXrYn-Q1gd9KXh4wkZnC4LaNmSnnNSqZFyS4DSmD_w60n0HkS-778ubt';
+            
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: message
+                    }),
+                    mode: 'no-cors'
+                });
+                console.log('Webhook sent successfully');
+            } catch (error) {
+                console.log('Webhook notification failed:', error);
+                // Try alternative method using a form
+                try {
+                    const form = new FormData();
+                    form.append('content', message);
+                    
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: form,
+                        mode: 'no-cors'
+                    });
+                    console.log('Webhook sent via form method');
+                } catch (formError) {
+                    console.log('Both webhook methods failed:', formError);
+                }
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            username = '';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('score').textContent = '0';
+            document.querySelector('.results-screen').style.display = 'none';
+            document.querySelector('.username-screen').style.display = 'block';
+        }
+
+        // Add event listeners when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('startButton').addEventListener('click', startQuiz);
+            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+            document.getElementById('playAgainBtn').addEventListener('click', restartQuiz);
+        });
+    </script>
+</body>
+</html>
